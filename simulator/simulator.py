@@ -59,15 +59,40 @@ time_slots = {
     }
 }
 
-def get_available_options():
+def get_available_options(task=None):
+
+    if task is None:
+        complexity = "medium"
+    else:
+        complexity = task.get("complexity", "medium")
+
     options = []
+    suitable_models = {
+        "low": ["Small", "Medium", "Large"],
+        "medium": ["Medium", "Large"],
+        "high": ["Large"]
+    }
+
+    allowed_models = suitable_models.get(
+        complexity,
+        ["Small", "Medium", "Large"]
+    )
+
+    workload_factor = {
+        "low": 0.7,
+        "medium": 1.0,
+        "high": 1.5
+    }.get(complexity, 1.0)
 
     for model_name, model in models.items():
+        if model_name not in allowed_models:
+            continue
         for location_name, location in locations.items():
             for time_name, time in time_slots.items():
 
                 latency = (
                     model["latency"]
+                    * workload_factor
                     * location["latency_factor"]
                 )
 
@@ -76,7 +101,7 @@ def get_available_options():
                     * location["cost_factor"]
                 )
 
-                energy = model["energy"]
+                energy = model["energy"] * workload_factor
 
                 carbon = (
                     energy
@@ -99,6 +124,15 @@ def get_available_options():
 
     return options
 
+def get_baseline_option(task=None):
+    options = get_available_options(task)
+    for option in options:
+        if (
+            option["model"] == "Large"
+            and option["location"] == "US"
+            and option["time"] == "Now"
+        ):
+            return option
 
 if __name__ == "__main__":
     options = get_available_options()
@@ -107,3 +141,9 @@ if __name__ == "__main__":
 
     for option in options[:5]:
         print(option)
+    baseline = get_baseline_option()
+
+    print("\nBaseline:")
+    print(baseline)
+
+
