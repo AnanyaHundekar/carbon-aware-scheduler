@@ -1,4 +1,4 @@
-from scheduler.carbon_forecast import get_carbon_forecast
+from simulator.carbon_forecast import get_carbon_forecast
 from scheduler.carbon_calculator import apply_carbon_intensity
 
 

@@ -24,11 +24,16 @@ def schedule_task_with_simulator(task, priorities):
     return decision
 
 
-def schedule_workflow_tasks(tasks, options_by_task, priorities):
+def schedule_workflow_tasks(tasks, options_by_task=None, priorities=None):
     """
     Schedule all workflow tasks using the simulator
     and scheduler.
     """
+
+    # Backward compatibility with TEST 18
+    if priorities is None:
+        priorities = options_by_task
+        options_by_task = {}
 
     results = []
 
