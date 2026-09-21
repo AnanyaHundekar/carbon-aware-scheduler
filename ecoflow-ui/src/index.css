@@ -1,0 +1,96 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  }
+}
+
+/* Glassmorphism helpers */
+.glass-panel {
+  @apply backdrop-blur-md bg-white/75 dark:bg-stone-900/75 border border-stone-200/70 dark:border-stone-800/70 shadow-sm transition-all;
+}
+
+.glass-panel-elevated {
+  @apply backdrop-blur-lg bg-white/90 dark:bg-stone-900/90 border border-stone-200/80 dark:border-stone-700/80 shadow-lg transition-all;
+}
+
+.glass-input {
+  @apply bg-stone-100/70 dark:bg-stone-800/70 border border-stone-300/60 dark:border-stone-700/60 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-terracotta-500/50 transition-all;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(224, 122, 95, 0.25);
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(224, 122, 95, 0.5);
+}
+
+/* Custom Range Slider styling */
+input[type=range] {
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+}
+
+input[type=range]:focus {
+  outline: none;
+}
+
+input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  height: 18px;
+  width: 18px;
+  border-radius: 50%;
+  background: #E07A5F;
+  border: 2px solid #ffffff;
+  box-shadow: 0 0 10px rgba(224, 122, 95, 0.5);
+  cursor: pointer;
+  margin-top: -6px;
+  transition: transform 0.15s ease, background 0.15s ease;
+}
+
+input[type=range]::-webkit-slider-thumb:hover {
+  transform: scale(1.15);
+  background: #cc6145;
+}
+
+input[type=range]::-webkit-slider-runnable-track {
+  width: 100%;
+  height: 6px;
+  cursor: pointer;
+  background: #e2e8f0;
+  border-radius: 9999px;
+}
+
+.dark input[type=range]::-webkit-slider-runnable-track {
+  background: #292524;
+}
+
+/* Pulsing highlight for optimal Pareto node */
+@keyframes pareto-pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(242, 204, 143, 0.7);
+  }
+  70% {
+    box-shadow: 0 0 0 12px rgba(242, 204, 143, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(242, 204, 143, 0);
+  }
+}
+
+.pulse-pareto {
+  animation: pareto-pulse 2s infinite;
+}
