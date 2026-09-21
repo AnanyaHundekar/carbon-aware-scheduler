@@ -17,3 +17,22 @@ def schedule_task_with_simulator(task, priorities):
     )
 
     return decision
+
+
+def schedule_workflow_tasks(tasks, priorities):
+    """
+    Schedule all tasks produced by Person 1's workflow agent.
+    """
+
+    results = []
+
+    for task in tasks:
+
+        decision = schedule_task_with_simulator(
+            task,
+            priorities
+        )
+
+        results.append(decision)
+
+    return results

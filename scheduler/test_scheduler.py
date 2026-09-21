@@ -306,7 +306,7 @@ for option in pareto_options:
 
 print("\n===== TEST 13: CARBON FORECAST =====")
 
-from scheduler.carbon_forecast import (
+from simulator.carbon_forecast import (
     get_carbon_forecast,
     get_cleanest_time
 )
@@ -324,7 +324,7 @@ print("\nCleanest execution time:")
 print(cleanest)
 print("\n===== TEST 14: TIME-DEPENDENT CARBON =====")
 
-from scheduler.carbon_forecast import get_carbon_forecast
+from simulator.carbon_forecast import get_carbon_forecast
 from scheduler.carbon_calculator import apply_carbon_intensity
 
 forecast = get_carbon_forecast()
@@ -459,7 +459,6 @@ decision = schedule_task_with_simulator(
 
 print("Final decision:")
 print(decision)
-
 print("\n===== TEST 18: PERSON 1 INTEGRATION =====")
 
 from scheduler.integration import schedule_workflow_tasks
@@ -475,13 +474,8 @@ person1_tasks = [
     }
 ]
 
-person3_options = {
-    "Analyze customer complaints": options
-}
-
 integration_results = schedule_workflow_tasks(
     person1_tasks,
-    person3_options,
     NORMAL_PRIORITIES
 )
 
