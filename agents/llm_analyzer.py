@@ -22,11 +22,13 @@ Analyze this user request and break it into executable workflow tasks.
 For every task determine:
 
 - task_id
-- description
-- accuracy_required from 0 to 1
-- latency_limit in minutes
-- urgent
-- can_defer
+- task: short task name
+- description: detailed task description
+- complexity: "low", "medium", or "high"
+- accuracy_requirement: number from 0 to 1
+- max_latency: maximum acceptable latency in minutes
+- urgency: "high", "normal", or "low"
+- can_defer: true or false
 
 Also determine the workflow deadline in minutes.
 
@@ -38,15 +40,27 @@ Use exactly this structure:
     "tasks": [
         {{
             "task_id": 1,
-            "description": "task description",
-            "accuracy_required": 0.8,
-            "latency_limit": 10,
-            "urgent": false,
-            "can_defer": true
+            "task": "Analyze customer complaints",
+            "description": "Analyze customer complaints",
+            "complexity": "medium",
+            "accuracy_requirement": 0.80,
+            "max_latency": 5,
+            "urgency": "high",
+            "can_defer": false
         }}
     ],
     "workflow_deadline": 30
 }}
+
+Do not use these old field names:
+- accuracy_required
+- latency_limit
+- urgent
+
+Use only:
+- accuracy_requirement
+- max_latency
+- urgency
 
 User request:
 {user_request}
@@ -70,7 +84,6 @@ User request:
         print("AI output:")
         print(text)
 
-        # Handle accidental markdown code fences
         if text.startswith("```"):
             text = text.replace("```json", "")
             text = text.replace("```", "")
