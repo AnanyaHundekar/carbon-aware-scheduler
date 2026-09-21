@@ -17,3 +17,27 @@ def schedule_task_with_simulator(task, priorities):
     )
 
     return decision
+
+
+def schedule_workflow_tasks(tasks, options_by_task, priorities):
+    """
+    Schedule all workflow tasks from Person 1
+    using Person 3's options and Person 2's scheduler.
+    """
+
+    results = []
+
+    for task in tasks:
+        task_name = task["task"]
+
+        options = options_by_task[task_name]
+
+        decision = schedule_task(
+            task,
+            options,
+            priorities
+        )
+
+        results.append(decision)
+
+    return results
