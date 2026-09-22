@@ -1,7 +1,7 @@
 from simulator.simulator import get_available_options
 from scheduler.decision_engine import schedule_task
 from agents.workflow_agent import analyze_workflow
-
+from scheduler.replanning_engine import run_automatic_replanning
 
 # ---------------------------------------------------------
 # Schedule one task using simulator options
@@ -110,56 +110,44 @@ def schedule_workflow_tasks(
 # Complete workflow
 # ---------------------------------------------------------
 
-def run_full_workflow(
-    user_request,
-    priorities
-):
+def run_full_workflow(user_request, priorities):
+    workflow = analyze_workflow(user_request)
+    tasks = workflow.get("tasks", [])
 
-    # Step 1:
-    # Analyze the natural-language request
-
-    workflow = analyze_workflow(
-        user_request
-    )
-
-    if workflow is None:
-
-        return {
-            "status": "error",
-            "message": "Workflow analysis failed."
-        }
-
-    # Step 2:
-    # Extract tasks
-
-    tasks = workflow.get(
-        "tasks",
-        []
-    )
-
-    if not tasks:
-
-        return {
-            "status": "error",
-            "message": "No workflow tasks were generated."
-        }
-
-    # Step 3:
-    # Schedule every task
-
-    results = schedule_workflow_tasks(
+    # Step 1: Create the initial schedule
+    initial_results = schedule_workflow_tasks(
         tasks,
         {},
         priorities
     )
 
-    # Step 4:
-    # Return complete result
+    # Step 2: Define current environment
+    current_conditions = {
+        "carbon_multiplier": 1.0,
+        "latency_multiplier": 1.0,
+        "unavailable_models": []
+    }
+
+    # Step 3: Define changed environment
+    new_conditions = {
+        "carbon_multiplier": 1.5,
+        "latency_multiplier": 1.2,
+        "unavailable_models": ["Medium"]
+    }
+
+    # Step 4: Automatically replan
+    replanning_results = run_automatic_replanning(
+        tasks,
+        priorities,
+        current_conditions,
+        new_conditions
+    )
 
     return {
         "status": "success",
         "workflow": workflow,
-        "schedule": results
+        "initial_schedule": initial_results,
+        "replanning": replanning_results
     }
 
 
