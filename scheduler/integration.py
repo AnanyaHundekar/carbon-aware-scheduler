@@ -3,15 +3,16 @@ from scheduler.decision_engine import schedule_task
 from agents.workflow_agent import analyze_workflow
 
 
+# ---------------------------------------------------------
+# Schedule one task using simulator options
+# ---------------------------------------------------------
+
 def schedule_task_with_simulator(task, priorities):
-    """
-    Get execution options from Person 3's simulator
-    and select the best option using Person 2's scheduler.
-    """
 
     options = get_available_options(task)
 
     if "task" not in task and "description" in task:
+
         task = task.copy()
         task["task"] = task["description"]
 
@@ -24,14 +25,22 @@ def schedule_task_with_simulator(task, priorities):
     return decision
 
 
-def schedule_workflow_tasks(tasks, options_by_task=None, priorities=None):
-    """
-    Schedule all workflow tasks using the simulator
-    and scheduler.
-    """
+# ---------------------------------------------------------
+# Schedule all workflow tasks
+# ---------------------------------------------------------
 
-    # Backward compatibility with TEST 18
+def schedule_workflow_tasks(
+    tasks,
+    options_by_task=None,
+    priorities=None
+):
+
+    # Backward compatibility:
+    # If only two arguments are supplied,
+    # treat the second argument as priorities.
+
     if priorities is None:
+
         priorities = options_by_task
         options_by_task = {}
 
@@ -41,28 +50,50 @@ def schedule_workflow_tasks(tasks, options_by_task=None, priorities=None):
 
         task_name = task.get(
             "task",
-            task.get("description")
+            task.get(
+                "description",
+                "Process task"
+            )
         )
 
         scheduler_task = task.copy()
 
-        # Gemini → Scheduler mapping
         scheduler_task["task"] = task_name
 
+        # Support old field names
         if "accuracy_required" in task:
-            scheduler_task["accuracy_requirement"] = task["accuracy_required"]
+
+            scheduler_task[
+                "accuracy_requirement"
+            ] = task[
+                "accuracy_required"
+            ]
 
         if "urgent" in task:
-            scheduler_task["urgency"] = (
-                "high" if task["urgent"] else "normal"
+
+            scheduler_task[
+                "urgency"
+            ] = (
+                "high"
+                if task["urgent"]
+                else "normal"
             )
 
-        # Use provided options if available
-        if options_by_task and task_name in options_by_task:
-            options = options_by_task[task_name]
+        # Use supplied options if available
+        if (
+            options_by_task
+            and task_name in options_by_task
+        ):
+
+            options = options_by_task[
+                task_name
+            ]
+
         else:
-            # Generate options using simulator
-            options = get_available_options(scheduler_task)
+
+            options = get_available_options(
+                scheduler_task
+            )
 
         decision = schedule_task(
             scheduler_task,
@@ -75,30 +106,46 @@ def schedule_workflow_tasks(tasks, options_by_task=None, priorities=None):
     return results
 
 
-def run_full_workflow(user_request, priorities):
-    """
-    Complete pipeline:
+# ---------------------------------------------------------
+# Complete workflow
+# ---------------------------------------------------------
 
-    User request
-        ↓
-    Gemini Workflow Analyzer
-        ↓
-    Task decomposition
-        ↓
-    Simulator options
-        ↓
-    Scheduler decision
-    """
+def run_full_workflow(
+    user_request,
+    priorities
+):
 
-    workflow = analyze_workflow(user_request)
+    # Step 1:
+    # Analyze the natural-language request
+
+    workflow = analyze_workflow(
+        user_request
+    )
 
     if workflow is None:
+
         return {
             "status": "error",
             "message": "Workflow analysis failed."
         }
 
-    tasks = workflow["tasks"]
+    # Step 2:
+    # Extract tasks
+
+    tasks = workflow.get(
+        "tasks",
+        []
+    )
+
+    if not tasks:
+
+        return {
+            "status": "error",
+            "message": "No workflow tasks were generated."
+        }
+
+    # Step 3:
+    # Schedule every task
 
     results = schedule_workflow_tasks(
         tasks,
@@ -106,8 +153,42 @@ def run_full_workflow(user_request, priorities):
         priorities
     )
 
+    # Step 4:
+    # Return complete result
+
     return {
         "status": "success",
         "workflow": workflow,
         "schedule": results
     }
+
+
+# ---------------------------------------------------------
+# Simple manual test
+# ---------------------------------------------------------
+
+if __name__ == "__main__":
+
+    from scheduler.config import (
+        NORMAL_PRIORITIES
+    )
+
+    request = (
+        "Analyze customer complaints, "
+        "verify the results, and summarize "
+        "the findings."
+    )
+
+    result = run_full_workflow(
+        request,
+        NORMAL_PRIORITIES
+    )
+
+    import json
+
+    print(
+        json.dumps(
+            result,
+            indent=4
+        )
+    )
