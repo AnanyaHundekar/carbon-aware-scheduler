@@ -2,7 +2,7 @@ from simulator.simulator import get_available_options
 from scheduler.decision_engine import schedule_task
 from agents.workflow_agent import analyze_workflow
 from scheduler.replanning_engine import run_automatic_replanning
-
+from agents.executor import execute_task
 # ---------------------------------------------------------
 # Schedule one task using simulator options
 # ---------------------------------------------------------
@@ -121,6 +121,36 @@ def run_full_workflow(user_request, priorities):
         priorities
     )
 
+        # Step 1.5: Execute the scheduled tasks
+    execution_results = []
+
+    for task, decision in zip(tasks, initial_results):
+
+        if not decision:
+            execution_results.append({
+                "task": task.get("task", "Unknown task"),
+                "status": "not_executed",
+                "reason": "No feasible scheduling option"
+            })
+            continue
+
+        selected_model = decision.get("model")
+
+        result = execute_task(
+            task.get(
+                "description",
+                task.get("task", "Process task")
+            ),
+            user_request,
+            model_name="gemini-3.5-flash-lite"
+        )
+
+        execution_results.append({
+            "task": task.get("task", "Unknown task"),
+            "selected_scheduler_model": selected_model,
+            "result": result
+        })
+
     # Step 2: Define current environment
     current_conditions = {
         "carbon_multiplier": 1.0,
@@ -144,11 +174,12 @@ def run_full_workflow(user_request, priorities):
     )
 
     return {
-        "status": "success",
-        "workflow": workflow,
-        "initial_schedule": initial_results,
-        "replanning": replanning_results
-    }
+    "status": "success",
+    "workflow": workflow,
+    "initial_schedule": initial_results,
+    "execution": execution_results,
+    "replanning": replanning_results
+}
 
 
 # ---------------------------------------------------------
